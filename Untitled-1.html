@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cashier System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .table-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .table-buttons button {
+            padding: 15px;
+            background-color: #f4f4f9;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .table-buttons button:hover {
+            background-color: #e0e0e0;
+        }
+        #selectedTable {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Simple Cashier System</h1>
+    </header>
+    <main>
+        <h2>Select Table</h2>
+        <div class="table-buttons">
+            <button onclick="selectTable(1)">Table 1</button>
+            <button onclick="selectTable(2)">Table 2</button>
+            <button onclick="selectTable(3)">Table 3</button>
+            <button onclick="selectTable(4)">Table 4</button>
+            <button onclick="selectTable(5)">Table 5</button>
+        </div>
+
+        <p id="selectedTable">Selected Table: None</p>
+
+        <label for="itemName">Item Name:</label>
+        <input type="text" id="itemName" placeholder="Enter item name">
+
+        <label for="itemPrice">Item Price:</label>
+        <input type="number" id="itemPrice" placeholder="Enter item price">
+
+        <button onclick="addItem()">Add Item</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Item Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="itemTable">
+                <!-- Items will appear here -->
+            </tbody>
+        </table>
+
+        <label for="discount">Discount (%):</label>
+        <input type="number" id="discount" placeholder="Enter discount percentage">
+
+        <button onclick="applyDiscount()">Apply Discount</button>
+
+        <p id="cashTotalPrice">Cash Total Price: $0.00</p>
+        <p id="cardTotalPrice">Card Total Price (including fee): $0.00</p>
+
+        <button onclick="handleCashPayment()">Cash Payment</button>
+        <button onclick="handleCardPayment()">Card Payment</button>
+    </main>
+
+    <script>
+        let orders = {};
+
+        function selectTable(tableNumber) {
+            document.getElementById('selectedTable').textContent = `Selected Table: ${tableNumber}`;
+            document.getElementById('tableNumber')?.remove();
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.id = 'tableNumber';
+            input.value = tableNumber;
+            document.body.appendChild(input);
+
+            renderTable();
+            calculateTotal();
+        }
+
+        function addItem() {
+            const tableNumber = document.getElementById('tableNumber')?.value;
+            if (!tableNumber) {
+                alert('Please select a table first.');
+                return;
+            }
+
+            const name = document.getElementById('itemName').value;
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (name && !isNaN(price)) {
+                if (!orders[tableNumber]) {
+                    orders[tableNumber] = [];
+                }
+                orders[tableNumber].push({ name, price });
+                renderTable();
+                calculateTotal();
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemPrice').value = '';
+            } else {
+                alert('Please enter valid item details.');
+            }
+        }
+
+        function renderTable() {
+            const tableNumber = document.getElementById('tableNumber')?.value;
+            const tbody = document.getElementById('itemTable');
+            tbody.innerHTML = '';
+
+            if (orders[tableNumber]) {
+                orders[tableNumber].forEach((item, index) => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td>
+                            <button onclick="deleteItem(${index})">Delete</button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function deleteItem(index) {
+            const tableNumber = document.getElementById('tableNumber').value;
+            orders[tableNumber].splice(index, 1);
+            renderTable();
+            calculateTotal();
+        }
+
+        function applyDiscount() {
+            const discount = parseFloat(document.getElementById('discount').value);
+            const tableNumber = document.getElementById('tableNumber')?.value;
+
+            if (!tableNumber || isNaN(discount) || discount < 0 || discount > 100) {
+                alert('Please enter a valid discount percentage (0-100).');
+                return;
+            }
+
+            orders[tableNumber] = orders[tableNumber].map(item => ({
+                name: item.name,
+                price: item.price * (1 - discount / 100),
+            }));
+            renderTable();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const tableNumber = document.getElementById('tableNumber')?.value;
+            const total = orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0;
+            const cardTotal = (total * 1.025).toFixed(2); // Adding 2.5% card fee
+
+            document.getElementById('cashTotalPrice').textContent = `Cash Total Price: $${total}`;
+            document.getElementById('cardTotalPrice').textContent = `Card Total Price (including fee): $${cardTotal}`;
+        }
+
+        function handleCashPayment() {
+            const tableNumber = document.getElementById('tableNumber')?.value;
+            const total = parseFloat(orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0);
+            const cashReceived = parseFloat(prompt(`Total is $${total}. Enter cash amount received:`));
+
+            if (!isNaN(cashReceived)) {
+                if (cashReceived === total) {
+                    alert('Payment successful. No change required.');
+                    orders[tableNumber] = [];
+                } else if (cashReceived > total) {
+                    const change = (cashReceived - total).toFixed(2);
+                    alert(`Payment successful. Change to give: $${change}`);
+                    orders[tableNumber] = [];
+                } else {
+                    alert('Insufficient cash received. Please collect full payment.');
+                }
+            } else {
+                alert('Invalid input. Transaction not completed.');
+            }
+        }
+
+        function handleCardPayment() {
+            const tableNumber = document.getElementById('tableNumber')?.value;
+            const total = parseFloat(orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0);
+            const cardTotal = (total * 1.025).toFixed(2);
+
+            const confirmPayment = confirm(`Total with card fee is $${cardTotal}. Confirm card payment?`);
+
+            if (confirmPayment) {
+                alert('Payment successful.');
+                orders[tableNumber] = [];
+                renderTable();
+                calculateTotal();
+            }
+        }
+    </script>
+</body>
+</html>
