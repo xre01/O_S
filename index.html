@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Cashier System</title>
+    <title>Cashier System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,52 +15,32 @@
             background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        header button {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        header button:hover {
+            background-color: #e0e0e0;
         }
         main {
             padding: 20px;
-            max-width: 600px;
+            max-width: 800px;
             margin: auto;
             background: white;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            text-align: left;
-            padding: 8px;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
         }
         .table-buttons {
             display: grid;
@@ -79,188 +59,277 @@
         }
         #selectedTable {
             font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .menu-column {
+            flex: 1;
+        }
+        .menu-column h3 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 0 0 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #addCustomItem {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #addCustomItem input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #addCustomItem button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #addCustomItem button:hover {
+            background-color: #45a049;
+        }
+        #orderHistoryModal {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: none;
+        }
+        #orderHistoryModal h2 {
+            margin-top: 0;
+        }
+        #orderHistoryModal table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #orderHistoryModal th, #orderHistoryModal td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        #closeHistory {
+            float: right;
+            cursor: pointer;
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Simple Cashier System</h1>
+        <h1>Cashier System</h1>
+        <button onclick="toggleOrderHistory()">Order History</button>
     </header>
     <main>
-        <h2>Select Table</h2>
-        <div class="table-buttons">
-            <button onclick="selectTable(1)">Table 1</button>
-            <button onclick="selectTable(2)">Table 2</button>
-            <button onclick="selectTable(3)">Table 3</button>
-            <button onclick="selectTable(4)">Table 4</button>
-            <button onclick="selectTable(5)">Table 5</button>
+        <div id="tableSelection">
+            <h2>Select Table</h2>
+            <div class="table-buttons">
+                <button onclick="selectTable(1)">Table 1</button>
+                <button onclick="selectTable(2)">Table 2</button>
+                <button onclick="selectTable(3)">Table 3</button>
+                <button onclick="selectTable(4)">Table 4</button>
+                <button onclick="selectTable(5)">Table 5</button>
+            </div>
         </div>
 
         <p id="selectedTable">Selected Table: None</p>
 
-        <label for="itemName">Item Name:</label>
-        <input type="text" id="itemName" placeholder="Enter item name">
+        <div id="menuSection" class="hidden">
+            <div class="menu">
+                <div class="menu-column">
+                    <h3>Prices</h3>
+                    <div class="table-buttons">
+                        <button onclick="addItem(null, 3.50)">$3.50</button>
+                        <button onclick="addItem(null, 5.90)">$5.90</button>
+                        <button onclick="addItem(null, 13.90)">$13.90</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <label for="itemPrice">Item Price:</label>
-        <input type="number" id="itemPrice" placeholder="Enter item price">
+        <div id="addCustomItem" class="hidden">
+            <h3>Add Custom Price</h3>
+            <input type="number" id="customPrice" placeholder="Enter Price" step="0.01" min="0">
+            <button onclick="addCustomPrice()">Add</button>
+        </div>
 
-        <button onclick="addItem()">Add Item</button>
+        <div id="orderSummary" class="hidden">
+            <h2>Order Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTable"></tbody>
+            </table>
+            <p id="totalPriceCash">Total (Cash): $0.00</p>
+            <p id="totalPriceCard">Total (Card, +2.5%): $0.00</p>
+            
+            <button id="cardPayButton" onclick="processPayment('card')">Card Pay</button>
+        </div>
 
+        <!-- Cash Payment Input -->
+        <div id="cashPaymentInput" class="hidden">
+            <label for="cashGiven">Enter Amount Given:</label>
+            <input type="number" id="cashGiven" placeholder="Enter amount given" step="0.01" min="0">
+            <button id="cashPayButton" onclick="processPayment('cash')">Cash Pay</button>
+        </div>
+        <p id="changeAmount" class="hidden">Change: $0.00</p>
+    </main>
+
+    <div id="orderHistoryModal">
+        <span id="closeHistory" onclick="toggleOrderHistory()">X</span>
+        <h2>Order History</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Item Name</th>
-                    <th>Item Price</th>
-                    <th>Actions</th>
+                    <th>Table</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                    <th>Time</th>
                 </tr>
             </thead>
-            <tbody id="itemTable">
-                <!-- Items will appear here -->
-            </tbody>
+            <tbody id="orderHistoryTable"></tbody>
         </table>
-
-        <label for="discount">Discount (%):</label>
-        <input type="number" id="discount" placeholder="Enter discount percentage">
-
-        <button onclick="applyDiscount()">Apply Discount</button>
-
-        <p id="cashTotalPrice">Cash Total Price: $0.00</p>
-        <p id="cardTotalPrice">Card Total Price (including fee): $0.00</p>
-
-        <button onclick="handleCashPayment()">Cash Payment</button>
-        <button onclick="handleCardPayment()">Card Payment</button>
-    </main>
+    </div>
 
     <script>
         let orders = {};
+        let selectedTable = null;
+        let orderHistory = [];
 
         function selectTable(tableNumber) {
+            selectedTable = tableNumber;
             document.getElementById('selectedTable').textContent = `Selected Table: ${tableNumber}`;
-            document.getElementById('tableNumber')?.remove();
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.id = 'tableNumber';
-            input.value = tableNumber;
-            document.body.appendChild(input);
-
-            renderTable();
-            calculateTotal();
+            document.getElementById('menuSection').classList.remove('hidden');
+            document.getElementById('orderSummary').classList.remove('hidden');
+            document.getElementById('addCustomItem').classList.remove('hidden');
+            renderOrderTable();
         }
 
-        function addItem() {
-            const tableNumber = document.getElementById('tableNumber')?.value;
-            if (!tableNumber) {
-                alert('Please select a table first.');
-                return;
+        function addItem(name, price) {
+            if (!orders[selectedTable]) {
+                orders[selectedTable] = [];
             }
+            orders[selectedTable].unshift({ name: name || 'Custom Item', price });
+            renderOrderTable();
+        }
 
-            const name = document.getElementById('itemName').value;
-            const price = parseFloat(document.getElementById('itemPrice').value);
-
-            if (name && !isNaN(price)) {
-                if (!orders[tableNumber]) {
-                    orders[tableNumber] = [];
-                }
-                orders[tableNumber].push({ name, price });
-                renderTable();
-                calculateTotal();
-                document.getElementById('itemName').value = '';
-                document.getElementById('itemPrice').value = '';
+        function addCustomPrice() {
+            const price = parseFloat(document.getElementById('customPrice').value);
+            if (!isNaN(price) && price > 0) {
+                addItem(null, price);
+                document.getElementById('customPrice').value = '';
             } else {
-                alert('Please enter valid item details.');
+                alert('Please enter a valid price.');
             }
         }
 
-        function renderTable() {
-            const tableNumber = document.getElementById('tableNumber')?.value;
-            const tbody = document.getElementById('itemTable');
-            tbody.innerHTML = '';
+        function renderOrderTable() {
+            const tableBody = document.getElementById('orderTable');
+            tableBody.innerHTML = '';
 
-            if (orders[tableNumber]) {
-                orders[tableNumber].forEach((item, index) => {
+            let total = 0;
+            if (orders[selectedTable]) {
+                orders[selectedTable].forEach((item, index) => {
                     const row = document.createElement('tr');
-
-                    row.innerHTML = `
-                        <td>${item.name}</td>
+                    row.innerHTML = 
+                        `<td>${item.name}</td>
                         <td>$${item.price.toFixed(2)}</td>
-                        <td>
-                            <button onclick="deleteItem(${index})">Delete</button>
-                        </td>
-                    `;
-
-                    tbody.appendChild(row);
+                        <td><button onclick="removeItem(${index})">Remove</button></td>`;
+                    tableBody.appendChild(row);
+                    total += item.price;
                 });
             }
-        }
 
-        function deleteItem(index) {
-            const tableNumber = document.getElementById('tableNumber').value;
-            orders[tableNumber].splice(index, 1);
-            renderTable();
-            calculateTotal();
-        }
-
-        function applyDiscount() {
-            const discount = parseFloat(document.getElementById('discount').value);
-            const tableNumber = document.getElementById('tableNumber')?.value;
-
-            if (!tableNumber || isNaN(discount) || discount < 0 || discount > 100) {
-                alert('Please enter a valid discount percentage (0-100).');
-                return;
-            }
-
-            orders[tableNumber] = orders[tableNumber].map(item => ({
-                name: item.name,
-                price: item.price * (1 - discount / 100),
-            }));
-            renderTable();
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            const tableNumber = document.getElementById('tableNumber')?.value;
-            const total = orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0;
-            const cardTotal = (total * 1.025).toFixed(2); // Adding 2.5% card fee
-
-            document.getElementById('cashTotalPrice').textContent = `Cash Total Price: $${total}`;
-            document.getElementById('cardTotalPrice').textContent = `Card Total Price (including fee): $${cardTotal}`;
-        }
-
-        function handleCashPayment() {
-            const tableNumber = document.getElementById('tableNumber')?.value;
-            const total = parseFloat(orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0);
-            const cashReceived = parseFloat(prompt(`Total is $${total}. Enter cash amount received:`));
-
-            if (!isNaN(cashReceived)) {
-                if (cashReceived === total) {
-                    alert('Payment successful. No change required.');
-                    orders[tableNumber] = [];
-                } else if (cashReceived > total) {
-                    const change = (cashReceived - total).toFixed(2);
-                    alert(`Payment successful. Change to give: $${change}`);
-                    orders[tableNumber] = [];
-                } else {
-                    alert('Insufficient cash received. Please collect full payment.');
-                }
-            } else {
-                alert('Invalid input. Transaction not completed.');
-            }
-        }
-
-        function handleCardPayment() {
-            const tableNumber = document.getElementById('tableNumber')?.value;
-            const total = parseFloat(orders[tableNumber]?.reduce((sum, item) => sum + item.price, 0).toFixed(2) || 0);
             const cardTotal = (total * 1.025).toFixed(2);
+            document.getElementById('totalPriceCash').textContent = `Total (Cash): $${total.toFixed(2)}`;
+            document.getElementById('totalPriceCard').textContent = `Total (Card, +2.5%): $${cardTotal}`;
+        }
 
-            const confirmPayment = confirm(`Total with card fee is $${cardTotal}. Confirm card payment?`);
+        function removeItem(index) {
+            orders[selectedTable].splice(index, 1);
+            renderOrderTable();
+        }
 
-            if (confirmPayment) {
-                alert('Payment successful.');
-                orders[tableNumber] = [];
-                renderTable();
-                calculateTotal();
+        function processPayment(method) {
+            const total = parseFloat(method === 'cash' 
+                ? document.getElementById('totalPriceCash').textContent.split('$')[1] 
+                : document.getElementById('totalPriceCard').textContent.split('$')[1]);
+
+            if (method === 'cash') {
+                const cashGiven = parseFloat(document.getElementById('cashGiven').value);
+                if (isNaN(cashGiven) || cashGiven < total) {
+                    alert('Please enter a valid amount given by the customer (greater than or equal to the total).');
+                    return;
+                }
+                const change = (cashGiven - total).toFixed(2);
+                document.getElementById('changeAmount').textContent = `Change: $${change}`;
+                document.getElementById('changeAmount').classList.remove('hidden');
             }
+
+            const now = new Date();
+            const time = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+            // Record order in the order history
+            orderHistory.push({
+                table: selectedTable,
+                amount: `$${total.toFixed(2)}`,
+                paymentMethod: method === 'cash' ? 'Cash' : 'Card',
+                time
+            });
+
+            // Reset the order
+            orders[selectedTable] = [];
+            renderOrderTable();
+        }
+
+        function toggleOrderHistory() {
+            const modal = document.getElementById('orderHistoryModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+
+            const orderHistoryTable = document.getElementById('orderHistoryTable');
+            orderHistoryTable.innerHTML = '';
+
+            orderHistory.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = 
+                    `<td>${order.table}</td>
+                    <td>${order.amount}</td>
+                    <td>${order.paymentMethod}</td>
+                    <td>${order.time}</td>`;
+                orderHistoryTable.appendChild(row);
+            });
         }
     </script>
 </body>
